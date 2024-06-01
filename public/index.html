@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Viewer</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #image-container {
+            text-align: center;
+        }
+        #image {
+            max-width: 80%;
+            max-height: 80vh;
+        }
+        .button-container {
+            margin-top: 20px;
+        }
+        button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #download-button {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>IAACS Image Downloader!</h1>
+    <h3>(Because doing it manually was boring 😃)</h3>
+    <div id="image-container">
+        <img id="image" src="" alt="Image will appear here">
+        <div class="button-container">
+            <button id="prev-button">Left</button>
+            <button id="next-button">Right</button>
+        </div>
+        <button id="save-button">Save</button>
+    </div>
+
+    <script>
+        const testSetUrl = '/test_set.csv';
+        const imageListUrl = '/image_list.csv';
+
+        let testSetImages = [];
+        let images = [];
+        let currentIndex = 0;
+
+        fetch(testSetUrl)
+            .then(response => response.text())
+            .then(data => {
+                const lines = data.split('\n');
+                for (let i = 1; i < lines.length; i++) {
+                    const [image_name] = lines[i].split(',');
+                    if (image_name) {
+                        testSetImages.push(image_name.trim());
+                    }
+                }
+                fetchImageList();
+            });
+
+        function fetchImageList() {
+            fetch(imageListUrl)
+                .then(response => response.text())
+                .then(data => {
+                    const lines = data.split('\n');
+                    for (let i = 1; i < lines.length; i++) {
+                        const [image_link, image_name] = lines[i].split(',');
+                        if (image_link && image_name && testSetImages.includes(image_name.trim())) {
+                            images.push({ link: image_link.trim(), name: image_name.trim() });
+                        }
+                    }
+                    showImage(currentIndex);
+                });
+        }
+
+        function showImage(index) {
+            const image = images[index];
+            const imgElement = document.getElementById('image');
+
+            if (image) {
+                imgElement.src = image.link;
+                imgElement.alt = image.name;
+            }
+        }
+
+        document.getElementById('next-button').addEventListener('click', () => {
+            if (currentIndex < images.length - 1) {
+                currentIndex++;
+                showImage(currentIndex);
+            }
+        });
+
+        document.getElementById('prev-button').addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                showImage(currentIndex);
+            }
+        });
+
+        document.getElementById('save-button').addEventListener('click', () => {
+            const image = images[currentIndex];
+            if (image) {
+                fetch(`/save-image?url=${encodeURIComponent(image.link)}&name=${encodeURIComponent(image.name)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Image saved successfully!');
+                        } else {
+                            alert('Failed to save image.');
+                        }
+                    });
+            }
+        });
+    </script>
+</body>
+</html>
