@@ -11,7 +11,7 @@ app.use(express.static('public'));
 app.get('/save-image', async (req, res) => {
     const { url, name } = req.query;
     if (!url || !name) {
-        return res.json({ success: false, message: 'Invalid parameters' });
+        return res.json({ success: false, message: 'Failed to save image' });
     }
 
     try {
@@ -29,5 +29,5 @@ app.get('/save-image', async (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Sv http://localhost:${port}`);
 });
