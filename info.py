@@ -25,3 +25,17 @@ for image_file in image_files:
 result_df = pd.DataFrame(data)
 
 result_df.to_csv('info.csv', index=False)
+
+print(result_df)
+
+for index, row in result_df.iterrows():
+    old_name = row['Actual Name']
+    new_name = f"{row['New Name']}.jpg"
+    old_path = os.path.join(images_dir, old_name)
+    new_path = os.path.join(images_dir, new_name)
+    if os.path.exists(old_path):
+        os.rename(old_path, new_path)
+        print(f"Renamed {old_name} to {new_name}")
+    else:
+        print("Error")
+
